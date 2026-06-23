@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Панель управления</title>
+  <style>
+    /* Настройки для СВЕТЛОЙ темы (по умолчанию) */
+    :root {
+      --bg-color: #f4f4f5;
+      --card-bg: #ffffff;
+      --text-color: #18181b;
+      --text-muted: #71717a;
+      --hover-bg: #f1f5f9;
+      --icon-color: #18181b;
+      --border-color: #e4e4e7;
+    }
+
+    /* Автоматическое переключение на ТЕМНУЮ тему */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #121214;
+        --card-bg: #1a1a1e;
+        --text-color: #e4e4e7;
+        --text-muted: #a1a1aa;
+        --hover-bg: #27272a;
+        --icon-color: #ffffff;
+        --border-color: #2d2d34;
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+      padding: 20px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-bottom: 32px;
+      text-align: center;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 16px;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-color);
+      font-weight: 500;
+      font-size: 1.1rem;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .card svg {
+      width: 40px;
+      height: 40px;
+    }
+
+    /* Иконки всегда противоположны фону благодаря переменной --icon-color */
+    .card svg path {
+      fill: var(--icon-color);
+      transition: fill 0.2s ease;
+    }
+
+    .card:hover {
+      background-color: var(--hover-bg);
+      transform: translateY(-2px);
+    }
+
+    /* Фирменная подсветка при наведении */
+    .card-perplexity:hover { border-color: #22c55e; }
+
+
+    .card-copilot:hover { border-color: #3b82f6; }
+
+
+    .card-gemini:hover { border-color: #a855f7; }
+
+    .card-site:hover { border-color: #03650e; }
+
+  </style>
+</head>
+<body>
+
+  <h1>AI Модели</h1>
+  <p>Быстрый запуск нейросетей через ярлыки</p>
+
+  <div class="grid">
+    <!-- Perplexity -->
+    <a href="https://perplexity.ai" target="_blank" class="card card-perplexity">
+            <span>Perplexity</span>
+    </a>
+
+    <!-- Copilot -->
+    <a href="https://copilot.microsoft.com" target="_blank" class="card card-copilot">
+            <span>Copilot</span>
+    </a>
+
+    <!-- Gemini -->
+    <a href="http://google.com/search?rlz=1C1GCEA_enRU1202RU1202&sourceid=chrome&ie=UTF-8&amc=1&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIQCAEQABixAxiABBjwBRieBjINCAIQABiABBjwBRieBjITCAMQABixAxiABBiKBRjwBRieBjINCAQQABiABBjwBRieBjINCAUQABiABBjwBRieBtIBCTQ1ODJqMGozM6gCBrACAeoHCggBEAAYACAAKAA&oq=%D0%BA%D0%B0%D0%BA+%D0%B4%D0%B5%D0%BB%D0%B0&udm=50&cud=0&source=chrome.crn.obic&mtid=41w6avJ-tKjA8A-XjvWYBQ&atvm=1&ved=2ahUKEwirn83ekJ2VAxXLHRAIHSaBLEoQoo4PegYIAggBEAQ" target="_blank" class="card card-gemini">
+           <span>Gemini</span>
+    </a>
+<a href="http://wnkk-libraary.vercel.app"target="_blank" class="card card-site">мой сайт</a>
+  </div>
+
+</body>
+</html>
