@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Панель управления</title>
+  <style>
+    /* Настройки для СВЕТЛОЙ темы (по умолчанию) */
+    :root {
+      --bg-color: #f4f4f5;
+      --card-bg: #ffffff;
+      --text-color: #18181b;
+      --text-muted: #71717a;
+      --hover-bg: #f1f5f9;
+      --border-color: #e4e4e7;
+      --perplexity-hover: #52525b;
+      --modal-overlay: rgba(0, 0, 0, 0.4);
+    }
+
+    /* Автоматическое переключение на ТЕМНУЮ тему */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #121214;
+        --card-bg: #1a1a1e;
+        --text-color: #e4e4e7;
+        --text-muted: #a1a1aa;
+        --hover-bg: #27272a;
+        --border-color: #2d2d34;
+        --perplexity-hover: #3f3f46;
+        --modal-overlay: rgba(0, 0, 0, 0.7);
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+      padding: 40px 20px 120px 20px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      text-align: center;
+      margin: 0 0 8px 0;
+    }
+
+    p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin: 0 0 24px 0;
+      text-align: center;
+    }
+
+    .section-title {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin: 24px 0 12px 0;
+      align-self: flex-start;
+      font-weight: 700;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 16px;
+      width: 100%;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-color);
+      font-weight: 500;
+      font-size: 1.1rem;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      cursor: pointer;
+    }
+
+    .card:hover {
+      background-color: var(--hover-bg);
+      transform: translateY(-2px);
+    }
+
+    /* Подсветка рамок при наведении */
+    .card-perplexity:hover { border-color: var(--perplexity-hover); }
+    .card-copilot:hover { border-color: #ff2e93; }
+    .card-gemini:hover { border-color: #4285f4; }
+    .card-chatgpt:hover { border-color: #d4d4d8; }
+    .card-claude:hover { border-color: #d97706; }
+    .card-grok:hover { border-color: #71717a; }
+    
+    .site-container {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 40px);
+      max-width: 500px;
+      z-index: 10;
+    }
+    
+    .card-site {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    
+    .card-site:hover { 
+      border-color: #03650e; 
+    }
+
+    /* ==========================================================
+       СТИЛИ ДЛЯ МОДАЛЬНОГО ОКНА ПРЕДУПРЕЖДЕНИЯ (VPN)
+       ========================================================== */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--modal-overlay);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-content {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 30px;
+      border-radius: 16px;
+      max-width: 420px;
+      width: 90%;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+      text-align: center;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: scale(1);
+    }
+
+    .modal-content h3 {
+      margin: 0 0 14px 0;
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+
+    .modal-content p {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: var(--text-color);
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    /* Список ссылок на приложения */
+    .vpn-links-list {
+      margin: 12px 0;
+      padding-left: 20px;
+    }
+
+    .vpn-links-list li {
+      margin-bottom: 8px;
+    }
+
+    .modal-content a {
+      color: #3b82f6;
+      text-decoration: underline;
+      font-weight: 500;
+    }
+
+    .modal-btn {
+      width: 100%;
+      padding: 12px;
+      background-color: #18181b;
+      color: #ffffff;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .modal-btn:disabled {
+      background-color: var(--bg-color);
+      color: var(--text-muted);
+      border-color: var(--border-color);
+      cursor: not-allowed;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .modal-btn {
+        background-color: #ffffff;
+        color: #121214;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>AI Модели</h1>
+    <p>Быстрый запуск нейросетей через ярлыки</p>
+
+    <!-- Подсекция: Без VPN -->
+    <div class="section-title">Без VPN</div>
+    <div class="grid">
+      <a href="https://perplexity.ai" target="_blank" class="card card-perplexity">
+        <span>Perplexity</span>
+      </a>
+
+      <a href="https://microsoft.com" target="_blank" class="card card-copilot">
+        <span>Copilot</span>
+      </a>
+
+      <a href="https://google.com" target="_blank" class="card card-gemini">
+        <span>Gemini</span>
+      </a>
+    </div>
+
+    <!-- Подсекция: С VPN -->
+    <div class="section-title">С VPN</div>
+    <div class="grid">
+      <a href="https://chatgpt.com" target="_blank" class="card card-chatgpt vpn-link">
+        <span>ChatGPT</span>
+      </a>
+
+      <a href="https://claude.ai" target="_blank" class="card card-claude vpn-link">
+        <span>Claude</span>
+      </a>
+
+      <a href="https://grok.com" target="_blank" class="card card-grok vpn-link">
+        <span>Grok</span>
+      </a>
+    </div>
+
+    <!-- Длинная кнопка перехода на ваш сайт -->
+    <div class="site-container">
+      <a href="https://wnkk-libraary.vercel.app" target="_blank" class="card card-site">
+        <span>мой сайт</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- ВСПЛЫВАЮЩЕЕ ОКНО (ДИСКЛЕЙМЕР VPN С КАСТОМНЫМИ СКРИПТАМИ ИМПОРТА) -->
+  <div class="modal-overlay" id="vpnModal">
+    <div class="modal-content">
+      <h3>Требуется VPN</h3>
+      <p>
+        Вы запускаете искусственный интеллект, которому для работы нужен VPN. 
+        <br><br>
+        Вы можете импортировать настройки конфигурации напрямую в ваши приложения:
+      </p>
+      
+      <!-- Новые добавленные ссылки по протоколам приложений -->
+      <ul class="vpn-links-list" style="text-align: left;">
+        <li><a href="v2raytun://add/https://xolirx-vpn.vercel.app/sub">Добавить в V2RayTun</a></li>
+        <li><a href="happ://add/https://xolirx-vpn.vercel.app/sub">Добавить в hApp</a></li>
+      </ul>
+
+      <p>
+        Вы принимаете эти условия использования ИИ и обязуетесь включить прокси перед началом сессии?
+      </p>
+      
+      <button class="modal-btn" id="agreeBtn" disabled>Я прочитал и согласен (5с)</button>
+    </div>
+  </div>
+
+  <script>
+    const vpnLinks = document.querySelectorAll('.vpn-link');
+    const modal = document.getElementById('vpnModal');
+    const agreeBtn = document.getElementById('agreeBtn');
+    
+    let targetUrl = '';
+    let countdownInterval;
+
+    vpnLinks.forEach(link => {
+      link.addEventListener('click', function(event) {
+        event.preventDefault();
+        targetUrl = this.getAttribute('href');
+        openVpnModal();
+      });
+    });
+
+    function openVpnModal() {
+      modal.classList.add('active');
+      agreeBtn.disabled = true;
+      
+      let timeLeft = 5;
+      agreeBtn.innerText = `Я прочитал и согласен (${timeLeft}с)`;
+
+      countdownInterval = setInterval(() => {
+        timeLeft--;
+        if (timeLeft > 0) {
+          agreeBtn.innerText = `Я прочитал и согласен (${timeLeft}с)`;
+        } else {
+          clearInterval(countdownInterval);
+          agreeBtn.disabled = false;
+          agreeBtn.innerText = "Я прочитал и согласен";
+        }
+      }, 1000);
+    }
+
+    agreeBtn.addEventListener('click', () => {
+      modal.classList.remove('active');
+      if (targetUrl) {
+        window.open(targetUrl, '_blank');
+      }
+    });
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        clearInterval(countdownInterval);
+        modal.classList.remove('active');
+      }
+    });
+  </script>
+
+</body>
+</html>
